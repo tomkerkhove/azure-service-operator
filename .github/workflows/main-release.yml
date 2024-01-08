@@ -33,9 +33,9 @@ jobs:
       - name: Build required release files
         run: |
           container_id=${{env.container_id}}
-          docker exec -e VERSION "$container_id" task make-release-artifacts
-        env:
-          VERSION: v0.0.0
+          docker exec -e VERSION="v0.0.0" "$container_id" task make-release-artifacts
+        # env:
+          # VERSION: v0.0.0
 
       - name: Upload release assets
         uses: svenstaro/upload-release-action@7319e4733ec7a184d739a6f412c40ffc339b69c7 # this is v2.5.0, but pinned
