@@ -33,7 +33,7 @@ jobs:
       - name: Build required release files
         run: |
           container_id=${{env.container_id}}
-          docker exec -e VERSION="v0.0.0" "$container_id" task make-release-artifacts
+          docker exec -e "$container_id" task VERSION=v0.0.0 make-release-artifacts
         # env:
           # VERSION: v0.0.0
 
