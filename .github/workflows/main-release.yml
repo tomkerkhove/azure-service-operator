@@ -34,6 +34,8 @@ jobs:
         run: |
           container_id=${{env.container_id}}
           docker exec -e VERSION "v0.0.0" "$container_id" task make-release-artifacts
+        env:
+          VERSION: v0.0.0
 
       - name: Upload release assets
         uses: svenstaro/upload-release-action@7319e4733ec7a184d739a6f412c40ffc339b69c7 # this is v2.5.0, but pinned
@@ -46,15 +48,17 @@ jobs:
       - name: Docker login
         run: |
           container_id=${{env.container_id}}
-          docker exec -e AZURE_CLIENT_ID -e AZURE_CLIENT_SECRET -e DOCKER_REGISTRY "$container_id" -e VERSION "v0.0.0" task docker-login
+          docker exec -e AZURE_CLIENT_ID -e AZURE_CLIENT_SECRET -e DOCKER_REGISTRY -e VERSION "$container_id" task docker-login
         env:
           DOCKER_REGISTRY: ${{ secrets.REGISTRY_LOGIN }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          VERSION: v0.0.0
 
       - name: Build, tag and push docker image
         run: |
           container_id=${{env.container_id}}
-          docker exec -e DOCKER_PUSH_TARGET "$container_id" -e VERSION "v0.0.0" task controller:docker-push-multiarch
+          docker exec -e DOCKER_PUSH_TARGET -e VERSION "$container_id" task controller:docker-push-multiarch
         env:
           DOCKER_PUSH_TARGET: ${{ secrets.REGISTRY_PUBLIC }}
+          VERSION: v0.0.0
