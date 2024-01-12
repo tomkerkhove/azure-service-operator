@@ -53,17 +53,15 @@ jobs:
       - name: Docker login
         run: |
           container_id=${{env.container_id}}
-          docker exec -e AZURE_CLIENT_ID -e AZURE_CLIENT_SECRET -e DOCKER_REGISTRY -e VERSION "$container_id" task docker-login
+          docker exec -e AZURE_CLIENT_ID -e AZURE_CLIENT_SECRET -e DOCKER_REGISTRY -e "$container_id" task VERSION=${{ env.ARTIFACT_VERSION }} docker-login
         env:
           DOCKER_REGISTRY: ${{ secrets.REGISTRY_LOGIN }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          VERSION: ${{ env.ARTIFACT_VERSION }}
 
       - name: Build, tag and push docker image
         run: |
           container_id=${{env.container_id}}
-          docker exec -e DOCKER_PUSH_TARGET -e VERSION "$container_id" task controller:docker-push-multiarch
+          docker exec -e DOCKER_PUSH_TARGET "$container_id" task VERSION=${{ env.ARTIFACT_VERSION }} controller:docker-push-multiarch
         env:
           DOCKER_PUSH_TARGET: ${{ secrets.REGISTRY_PUBLIC }}
-          VERSION: ${{ env.ARTIFACT_VERSION }}
