@@ -8,13 +8,15 @@ on:
       - main
       - main-images
 
+env:
+  ARTIFACT_VERSION: v0.0.0-main
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        if: 
         with:
           fetch-depth: 0 # required to access tags
           submodules: "true"
@@ -34,7 +36,7 @@ jobs:
       - name: Build required release files
         run: |
           container_id=${{env.container_id}}
-          docker exec "$container_id" task VERSION=v0.0.0-main LATEST_VERSION_TAG=v0.0.0-main make-release-artifacts
+          docker exec "$container_id" task VERSION=${{ env.ARTIFACT_VERSION }} LATEST_VERSION_TAG=${{ env.ARTIFACT_VERSION }} make-release-artifacts
 
       - name: Upload release assets
         uses: svenstaro/upload-release-action@7319e4733ec7a184d739a6f412c40ffc339b69c7 # this is v2.5.0, but pinned
@@ -43,6 +45,10 @@ jobs:
           tag: main
           file: "v2/out/release/*"
           file_glob: true
+          prerelease: true
+          overwrite: true
+          release_name: "Experimental"
+          body: "Experimental release created from main branch on commit ${{ github.sha }}."
 
       - name: Docker login
         run: |
@@ -52,7 +58,6 @@ jobs:
           DOCKER_REGISTRY: ${{ secrets.REGISTRY_LOGIN }}
           AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          VERSION: v0.0.0
 
       - name: Build, tag and push docker image
         run: |
@@ -60,4 +65,4 @@ jobs:
           docker exec -e DOCKER_PUSH_TARGET -e VERSION "$container_id" task controller:docker-push-multiarch
         env:
           DOCKER_PUSH_TARGET: ${{ secrets.REGISTRY_PUBLIC }}
-          VERSION: v0.0.0
+          VERSION: ${{ env.ARTIFACT_VERSION }}
